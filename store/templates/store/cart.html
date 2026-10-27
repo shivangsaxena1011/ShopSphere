@@ -1,0 +1,249 @@
+{% extends 'base.html' %}
+
+{% block title %}Shopping Cart - ShopSphere{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8">
+
+  <!-- Progress Stepper -->
+  <div class="bg-white border border-outline-variant rounded-2xl p-4 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div class="flex items-center gap-2 text-xs font-medium text-gray-500">
+      <a href="{% url 'home' %}" class="hover:text-primary transition-colors flex items-center gap-1">
+        <span class="material-symbols-outlined text-[15px]">home</span> Home
+      </a>
+      <span class="text-gray-300">/</span>
+      <span class="text-gray-900 font-semibold">Shopping Cart</span>
+    </div>
+
+    <!-- Stepper Pills -->
+    <div class="flex items-center gap-2 text-xs font-semibold">
+      <div class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary text-white shadow-xs">
+        <span class="material-symbols-outlined text-[14px]">shopping_bag</span>
+        <span>1. Cart Reviewed</span>
+      </div>
+      <div class="w-4 h-0.5 bg-gray-200"></div>
+      <div class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-gray-100 text-gray-400">
+        <span class="material-symbols-outlined text-[14px]">local_shipping</span>
+        <span>2. Delivery & COD</span>
+      </div>
+      <div class="w-4 h-0.5 bg-gray-200"></div>
+      <div class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-gray-100 text-gray-400">
+        <span class="material-symbols-outlined text-[14px]">verified</span>
+        <span>3. Confirmation</span>
+      </div>
+    </div>
+  </div>
+
+  {% if cart_count > 0 %}
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      
+      <!-- LEFT COLUMN: Cart Items (Span 8) -->
+      <div class="lg:col-span-8 space-y-4">
+        
+        <div class="bg-white border border-outline-variant rounded-2xl p-6 shadow-xs">
+          <div class="flex items-center justify-between pb-4 border-b border-gray-100 mb-4">
+            <h1 class="text-xl font-bold text-gray-900 flex items-center gap-2">
+              <span class="material-symbols-outlined text-primary text-[24px]">shopping_bag</span>
+              <span>Your Shopping Cart ({{ cart_count }} {% if cart_count == 1 %}item{% else %}items{% endif %})</span>
+            </h1>
+            <span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full flex items-center gap-1">
+              <span class="material-symbols-outlined text-[14px]">check_circle</span> Live Stock Allocated
+            </span>
+          </div>
+
+          <!-- Items List -->
+          <div class="divide-y divide-gray-100">
+            {% for item in cart %}
+              <div class="py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 cart-row-{{ item.product.id }}">
+                
+                <!-- Product Details -->
+                <div class="flex items-center gap-4 min-w-0">
+                  <a href="{% url 'product_detail' item.product.slug %}" class="w-20 h-20 rounded-xl bg-gray-50 border border-outline-variant overflow-hidden shrink-0 block">
+                    <img src="{{ item.product.get_image_url }}" alt="{{ item.product.name }}" class="w-full h-full object-cover hover:scale-105 transition-transform"/>
+                  </a>
+                  <div class="space-y-1 min-w-0">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-primary">{{ item.product.category.name }}</span>
+                    <h3 class="font-bold text-sm text-gray-900 truncate">
+                      <a href="{% url 'product_detail' item.product.slug %}" class="hover:text-primary transition-colors">{{ item.product.name }}</a>
+                    </h3>
+                    <p class="text-xs text-gray-500">Unit Price: ₹{{ item.price|floatformat:2 }}</p>
+                    <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-600">
+                      <span class="material-symbols-outlined text-[13px]">check</span> In Stock
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Quantity & Actions -->
+                <div class="flex sm:flex-col items-center sm:items-end justify-between w-full sm:w-auto gap-3 pt-2 sm:pt-0">
+                  <div class="text-right">
+                    <span class="text-base font-extrabold text-gray-900 item-line-total-{{ item.product.id }}">₹{{ item.line_total|floatformat:2 }}</span>
+                  </div>
+
+                  <div class="flex items-center gap-3">
+                    <!-- Stepper -->
+                    <div class="inline-flex items-center bg-gray-50 border border-outline-variant rounded-xl p-0.5 shadow-xs">
+                      <button type="button" onclick="updateCartItem({{ item.product.id }}, {{ item.quantity|add:'-1' }})" class="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-gray-200 text-gray-700 transition-colors">
+                        <span class="material-symbols-outlined text-[15px]">remove</span>
+                      </button>
+                      <span class="w-8 text-center text-xs font-bold text-gray-800">{{ item.quantity }}</span>
+                      <button type="button" onclick="updateCartItem({{ item.product.id }}, {{ item.quantity|add:'1' }})" class="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-gray-200 text-gray-700 transition-colors">
+                        <span class="material-symbols-outlined text-[15px]">add</span>
+                      </button>
+                    </div>
+
+                    <!-- Delete Button -->
+                    <form action="{% url 'cart_remove' item.product.id %}" method="POST">
+                      {% csrf_token %}
+                      <button type="submit" class="p-1.5 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors" title="Remove Item">
+                        <span class="material-symbols-outlined text-[20px]">delete</span>
+                      </button>
+                    </form>
+                  </div>
+                </div>
+
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- COD Assurance Strip -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div class="p-3.5 bg-white border border-outline-variant rounded-xl flex items-center gap-3 shadow-xs">
+            <span class="material-symbols-outlined text-emerald-600 text-[24px]">verified</span>
+            <div class="text-xs">
+              <span class="font-bold text-gray-900 block">Inspect on Delivery</span>
+              <span class="text-gray-500">Pay only after checking</span>
+            </div>
+          </div>
+          <div class="p-3.5 bg-white border border-outline-variant rounded-xl flex items-center gap-3 shadow-xs">
+            <span class="material-symbols-outlined text-primary text-[24px]">local_shipping</span>
+            <div class="text-xs">
+              <span class="font-bold text-gray-900 block">Free Express Shipping</span>
+              <span class="text-gray-500">Zero shipping fees</span>
+            </div>
+          </div>
+          <div class="p-3.5 bg-white border border-outline-variant rounded-xl flex items-center gap-3 shadow-xs">
+            <span class="material-symbols-outlined text-amber-600 text-[24px]">published_with_changes</span>
+            <div class="text-xs">
+              <span class="font-bold text-gray-900 block">7-Day Doorstep Return</span>
+              <span class="text-gray-500">Immediate replacement</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- RIGHT COLUMN: Order Summary (Span 4) -->
+      <div class="lg:col-span-4 space-y-4">
+        
+        <div class="bg-white border border-outline-variant rounded-2xl p-6 shadow-xs space-y-5">
+          <h2 class="text-lg font-bold text-gray-900 pb-3 border-b border-gray-100 flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary text-[20px]">receipt_long</span>
+            <span>Order Summary</span>
+          </h2>
+
+          <div class="space-y-3 text-sm">
+            <div class="flex items-center justify-between text-gray-600">
+              <span>Items Subtotal:</span>
+              <span class="font-semibold text-gray-900" id="cart-summary-subtotal">₹{{ subtotal|floatformat:2 }}</span>
+            </div>
+            <div class="flex items-center justify-between text-gray-600">
+              <span>Shipping & Delivery:</span>
+              <span class="font-bold text-emerald-600">FREE</span>
+            </div>
+            <div class="flex items-center justify-between text-gray-600">
+              <span>Payment Processing Fee:</span>
+              <span class="font-bold text-emerald-600">₹0.00</span>
+            </div>
+
+            <!-- Coupon Code Form -->
+            <div class="pt-2">
+              <label class="block text-xs font-semibold text-gray-500 mb-1.5">Have a Promo Coupon?</label>
+              <div class="flex items-center gap-2">
+                <input type="text" id="couponInput" placeholder="e.g. SHOPSPHERE10" class="flex-1 bg-gray-50 border border-outline-variant rounded-xl px-3 py-2 text-xs text-gray-800 outline-none uppercase font-semibold focus:border-primary"/>
+                <button type="button" onclick="applyCoupon()" class="bg-gray-100 hover:bg-primary hover:text-white text-gray-700 text-xs font-bold px-3 py-2 rounded-xl transition-colors">
+                  Apply
+                </button>
+              </div>
+              <p id="couponFeedback" class="text-[11px] text-emerald-600 font-semibold mt-1 hidden"></p>
+            </div>
+
+            <div class="border-t border-gray-100 pt-3 flex items-baseline justify-between">
+              <span class="text-base font-bold text-gray-900">Total Payable:</span>
+              <div class="text-right">
+                <span class="text-2xl font-extrabold text-primary" id="cart-summary-total">₹{{ total|floatformat:2 }}</span>
+                <span class="block text-[11px] text-gray-400">Pay cash upon delivery</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Checkout CTA -->
+          <a href="{% url 'checkout' %}" class="w-full bg-primary hover:bg-primary-hover text-white py-3.5 px-6 rounded-xl font-bold text-sm shadow-md shadow-primary/20 flex items-center justify-center gap-2 transition-all transform active:scale-95 block text-center">
+            <span>Proceed to Checkout</span>
+            <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+          </a>
+
+          <!-- Payment Method Badge -->
+          <div class="p-3 bg-emerald-50 border border-emerald-100 rounded-xl flex items-center gap-2.5 text-xs text-emerald-800">
+            <span class="material-symbols-outlined text-[20px] text-emerald-600">payments</span>
+            <span class="font-medium">Selected: <strong>Cash on Delivery (COD)</strong></span>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  {% else %}
+    <!-- EMPTY CART STATE -->
+    <div class="bg-white border border-outline-variant rounded-3xl p-12 text-center max-w-xl mx-auto space-y-5 shadow-xs">
+      <div class="w-20 h-20 rounded-full bg-blue-50 text-primary flex items-center justify-center mx-auto">
+        <span class="material-symbols-outlined text-[40px]">remove_shopping_cart</span>
+      </div>
+      <div class="space-y-1">
+        <h2 class="text-2xl font-bold text-gray-900">Your Shopping Cart is Empty</h2>
+        <p class="text-sm text-gray-500">
+          Looks like you haven't added anything to your cart yet. Explore our curated catalog of authentic electronics, apparel, and lifestyle goods.
+        </p>
+      </div>
+      <a href="{% url 'product_list' %}" class="inline-flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-7 py-3 rounded-xl font-bold text-sm shadow-md transition-colors">
+        <span class="material-symbols-outlined text-[18px]">storefront</span>
+        <span>Explore Catalog</span>
+      </a>
+    </div>
+  {% endif %}
+
+</div>
+
+<!-- Hidden form for AJAX quantity update -->
+<form id="ajaxUpdateForm" action="{% url 'cart_update' %}" method="POST" style="display:none;">
+  {% csrf_token %}
+  <input type="hidden" name="product_id" id="updateProductId"/>
+  <input type="hidden" name="quantity" id="updateQuantity"/>
+</form>
+
+<script>
+function updateCartItem(productId, quantity) {
+  const form = document.getElementById('ajaxUpdateForm');
+  document.getElementById('updateProductId').value = productId;
+  document.getElementById('updateQuantity').value = quantity;
+  form.submit();
+}
+
+function applyCoupon() {
+  const code = document.getElementById('couponInput').value.trim().toUpperCase();
+  const feedback = document.getElementById('couponFeedback');
+  if (code === 'SHOPSPHERE10' || code === 'FIRSTBUY') {
+    feedback.innerText = "Coupon applied! Enjoy 10% complimentary doorstep benefit.";
+    feedback.classList.remove('hidden');
+    feedback.classList.remove('text-red-600');
+    feedback.classList.add('text-emerald-600');
+  } else if (code) {
+    feedback.innerText = "Invalid coupon code. Try 'FIRSTBUY' or 'SHOPSPHERE10'.";
+    feedback.classList.remove('hidden');
+    feedback.classList.remove('text-emerald-600');
+    feedback.classList.add('text-red-600');
+  }
+}
+</script>
+{% endblock %}

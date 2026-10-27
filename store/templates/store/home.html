@@ -1,0 +1,253 @@
+{% extends 'base.html' %}
+
+{% block title %}ShopSphere - Discover Amazing Products | Cash on Delivery{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-12">
+
+  <!-- HERO SHOWCASE SECTION -->
+  <section class="relative rounded-2xl overflow-hidden bg-gradient-to-r from-blue-100 via-blue-50 to-white border border-blue-200/60 shadow-sm">
+    <div class="grid grid-cols-1 lg:grid-cols-12 items-center min-h-[400px] p-6 lg:p-12 relative z-10 gap-8">
+      
+      <div class="lg:col-span-7 space-y-5">
+        <div class="inline-flex items-center gap-2 bg-blue-600/10 text-primary font-semibold text-xs px-3.5 py-1 rounded-full border border-blue-200">
+          <span class="material-symbols-outlined text-[15px] text-amber-500">local_fire_department</span>
+          <span>Verified Electronics & Lifestyle • Doorstep Delivery</span>
+        </div>
+        
+        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-gray-900 tracking-tight leading-tight">
+          Discover <br/>
+          <span class="text-primary">Amazing Products</span>
+        </h1>
+        
+        <p class="text-base sm:text-lg text-gray-600 max-w-xl leading-relaxed">
+          Curated tech essentials, daily lifestyle gear, and modern accessories. Shop with 100% confidence with verified Cash on Delivery.
+        </p>
+
+        <div class="flex flex-wrap items-center gap-4 pt-2">
+          <a href="{% url 'product_list' %}" class="inline-flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-7 py-3.5 rounded-xl font-semibold text-sm shadow-md shadow-blue-500/25 transition-all transform active:scale-95">
+            <span>Shop Now</span>
+            <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+          </a>
+          
+          <div class="flex items-center gap-3 px-4 py-2.5 bg-white/90 backdrop-blur-sm rounded-xl border border-gray-200 shadow-xs">
+            <div class="w-9 h-9 rounded-lg bg-emerald-50 text-secondary flex items-center justify-center">
+              <span class="material-symbols-outlined text-[20px]">payments</span>
+            </div>
+            <div>
+              <p class="text-xs font-bold text-gray-900">Pay at Doorstep</p>
+              <p class="text-[11px] text-gray-500">Zero prepay risk</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Hero Image Preview -->
+      <div class="lg:col-span-5 relative flex justify-center items-center">
+        <div class="w-64 h-64 sm:w-80 sm:h-80 relative flex items-center justify-center">
+          <div class="absolute inset-0 bg-blue-500/15 rounded-full blur-3xl transform scale-95"></div>
+          <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuCHEfqpWusBPWAr__qrc_ZIUEN37ec0el8nkbaqIiy7lNslpw3lUUvswkYfjJRZgPUgKjLwa6xwxvSBJCUrv-m8HPbLcmNrcVR-ChfCf4w6_IE3p5aZ_4_ndEB6-49lxZBbRdwKe0GVMmxXe9YGSzDKbwmmojWKT2nz4hN7En33FQqvPOvsaOK-Zz0h929QIr1dDimiijdysaQ9bcCAqLfHGFbQlsPS0tVvTui4o_LUSCGje-r4yp7c" alt="Hero Featured Product" class="w-full h-full object-contain relative z-10 drop-shadow-xl hover:scale-105 transition-transform duration-500"/>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- 4 VALUE PROPOSITIONS -->
+  <section class="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <div class="flex items-center gap-3.5 p-4 bg-white rounded-xl border border-outline-variant shadow-xs">
+      <div class="w-12 h-12 rounded-xl bg-blue-50 text-primary flex items-center justify-center shrink-0">
+        <span class="material-symbols-outlined text-[24px]">payments</span>
+      </div>
+      <div>
+        <h4 class="font-semibold text-sm text-gray-900">Cash on Delivery</h4>
+        <p class="text-xs text-gray-500">Pay on physical delivery</p>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-3.5 p-4 bg-white rounded-xl border border-outline-variant shadow-xs">
+      <div class="w-12 h-12 rounded-xl bg-emerald-50 text-secondary flex items-center justify-center shrink-0">
+        <span class="material-symbols-outlined text-[24px]">local_shipping</span>
+      </div>
+      <div>
+        <h4 class="font-semibold text-sm text-gray-900">Fast Dispatch</h4>
+        <p class="text-xs text-gray-500">Shipped in 24 hours</p>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-3.5 p-4 bg-white rounded-xl border border-outline-variant shadow-xs">
+      <div class="w-12 h-12 rounded-xl bg-amber-50 text-tertiary flex items-center justify-center shrink-0">
+        <span class="material-symbols-outlined text-[24px]">published_with_changes</span>
+      </div>
+      <div>
+        <h4 class="font-semibold text-sm text-gray-900">7-Day Returns</h4>
+        <p class="text-xs text-gray-500">Hassle-free guarantee</p>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-3.5 p-4 bg-white rounded-xl border border-outline-variant shadow-xs">
+      <div class="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+        <span class="material-symbols-outlined text-[24px]">support_agent</span>
+      </div>
+      <div>
+        <h4 class="font-semibold text-sm text-gray-900">24/7 Support</h4>
+        <p class="text-xs text-gray-500">Dedicated phone & chat</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- POPULAR CATEGORIES -->
+  <section class="space-y-4">
+    <div class="flex items-center justify-between">
+      <div>
+        <span class="text-xs font-bold text-primary uppercase tracking-wider">Browse Collections</span>
+        <h2 class="text-2xl font-bold text-gray-900">Popular Categories</h2>
+      </div>
+      <a href="{% url 'product_list' %}" class="text-sm font-semibold text-primary hover:text-primary-hover flex items-center gap-1 transition-colors">
+        <span>View Catalog</span>
+        <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+      </a>
+    </div>
+
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      {% for category in categories %}
+        <a href="{% url 'product_list' %}?category={{ category.slug }}" class="group bg-white hover:bg-blue-50/50 border border-outline-variant hover:border-primary/50 transition-all duration-200 p-6 rounded-2xl shadow-xs flex flex-col items-center text-center">
+          <div class="w-16 h-16 rounded-2xl bg-blue-50 text-primary flex items-center justify-center mb-3 group-hover:scale-110 group-hover:bg-primary group-hover:text-white transition-all shadow-xs">
+            <span class="material-symbols-outlined text-[32px]">{{ category.icon_name|default:'category' }}</span>
+          </div>
+          <span class="font-bold text-base text-gray-900 group-hover:text-primary transition-colors">{{ category.name }}</span>
+          <span class="text-xs text-gray-500 mt-1">{{ category.products.count }} Products</span>
+        </a>
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- FEATURED PRODUCTS GRID -->
+  <section class="space-y-4">
+    <div class="flex items-center justify-between">
+      <div>
+        <span class="text-xs font-bold text-primary uppercase tracking-wider">Top Picks</span>
+        <h2 class="text-2xl font-bold text-gray-900">Featured Products</h2>
+      </div>
+      <a href="{% url 'product_list' %}" class="text-sm font-semibold text-primary hover:text-primary-hover flex items-center gap-1 transition-colors">
+        <span>See All ({{ featured_products.count }}+)</span>
+        <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+      </a>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      {% for product in featured_products %}
+        <div class="group bg-white border border-outline-variant rounded-2xl overflow-hidden shadow-xs hover:shadow-md hover:border-primary/40 transition-all flex flex-col justify-between">
+          
+          <div>
+            <!-- Image Area -->
+            <a href="{% url 'product_detail' product.slug %}" class="block relative aspect-square bg-gray-50 overflow-hidden">
+              <img src="{{ product.get_image_url }}" alt="{{ product.name }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"/>
+              
+              <!-- Badges -->
+              <div class="absolute top-3 left-3 flex flex-col gap-1">
+                {% if product.in_stock %}
+                  <span class="bg-emerald-600 text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full shadow-xs">In Stock</span>
+                {% else %}
+                  <span class="bg-red-600 text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full shadow-xs">Out of Stock</span>
+                {% endif %}
+              </div>
+
+              <div class="absolute bottom-2.5 right-2.5 bg-black/60 backdrop-blur-xs text-white text-[11px] font-semibold px-2 py-0.5 rounded-md flex items-center gap-1">
+                <span class="material-symbols-outlined text-[13px] text-amber-400">star</span>
+                <span>{{ product.rating }}</span>
+              </div>
+            </a>
+
+            <!-- Content Area -->
+            <div class="p-4 space-y-2">
+              <span class="text-[11px] font-bold uppercase tracking-wider text-primary">{{ product.category.name }}</span>
+              <h3 class="font-bold text-sm text-gray-900 group-hover:text-primary transition-colors line-clamp-1">
+                <a href="{% url 'product_detail' product.slug %}">{{ product.name }}</a>
+              </h3>
+              <p class="text-xs text-gray-500 line-clamp-2">{{ product.description }}</p>
+            </div>
+          </div>
+
+          <!-- Price & Action Footer -->
+          <div class="p-4 pt-0">
+            <div class="flex items-baseline justify-between mb-3">
+              <div>
+                <span class="text-lg font-bold text-gray-900">₹{{ product.price|floatformat:2 }}</span>
+                {% if product.original_price %}
+                  <span class="text-xs line-through text-gray-400 ml-1.5">₹{{ product.original_price|floatformat:2 }}</span>
+                {% endif %}
+              </div>
+              <span class="text-[11px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">COD Eligible</span>
+            </div>
+
+            {% if product.in_stock %}
+              <form action="{% url 'cart_add' product.id %}" method="POST" class="ajax-cart-form">
+                {% csrf_token %}
+                <button type="submit" class="w-full bg-primary hover:bg-primary-hover text-white py-2.5 px-4 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 shadow-sm transition-all transform active:scale-95">
+                  <span class="material-symbols-outlined text-[18px]">add_shopping_cart</span>
+                  <span>Add to Cart</span>
+                </button>
+              </form>
+            {% else %}
+              <button disabled class="w-full bg-gray-100 text-gray-400 py-2.5 px-4 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 cursor-not-allowed">
+                <span>Out of Stock</span>
+              </button>
+            {% endif %}
+          </div>
+
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- CASH ON DELIVERY PERKS BANNER -->
+  <section class="bg-gray-900 text-white rounded-2xl p-8 sm:p-12 relative overflow-hidden border border-gray-800">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center relative z-10">
+      <div class="space-y-4">
+        <span class="bg-blue-600/30 text-blue-400 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider border border-blue-500/30">
+          Payment Security Promise
+        </span>
+        <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight">
+          Inspect First. Pay at Your Doorstep.
+        </h2>
+        <p class="text-gray-400 text-sm leading-relaxed max-w-lg">
+          No credit card numbers or upfront gateway transfers required. Receive your parcel, verify your item packaging, and pay our delivery courier in cash or UPI.
+        </p>
+        <div class="flex items-center gap-6 pt-2 text-xs font-semibold text-gray-300">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-emerald-400">check_circle</span>
+            <span>Zero Prepayment</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-emerald-400">check_circle</span>
+            <span>Free Doorstep Returns</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex justify-center md:justify-end">
+        <div class="bg-gray-800 border border-gray-700 p-6 rounded-2xl max-w-sm w-full space-y-4">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+              <span class="material-symbols-outlined text-[24px]">verified</span>
+            </div>
+            <div>
+              <p class="text-sm font-bold text-white">Genuine Delivery Assured</p>
+              <p class="text-xs text-gray-400">100% replacement warranty</p>
+            </div>
+          </div>
+          <div class="border-t border-gray-700 pt-3 flex items-center justify-between text-xs">
+            <span class="text-gray-400">Payment Modes Accepted:</span>
+            <span class="font-bold text-white">Cash / Doorstep UPI</span>
+          </div>
+          <a href="{% url 'product_list' %}" class="block text-center bg-primary hover:bg-primary-hover text-white py-2.5 rounded-xl text-xs font-bold transition-colors">
+            Start Shopping Today
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>
+{% endblock %}

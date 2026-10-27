@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{% block title %}ShopSphere - Simple & Modern E-Commerce{% endblock %}</title>
+
+  <!-- Google Fonts & Material Symbols -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              DEFAULT: "#2563EB",
+              hover: "#1D4ED8",
+              light: "#DBEAFE",
+              container: "#2563eb",
+            },
+            secondary: {
+              DEFAULT: "#10B981",
+              hover: "#059669",
+              light: "#D1FAE5",
+              container: "#6cf8bb",
+            },
+            tertiary: {
+              DEFAULT: "#F59E0B",
+              hover: "#D97706",
+              light: "#FEF3C7",
+            },
+            surface: "#F8FAFC",
+            "on-surface": "#1F2937",
+            "on-surface-variant": "#4B5563",
+            "outline-variant": "#E5E7EB",
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          }
+        }
+      }
+    };
+  </script>
+  <link rel="stylesheet" href="/static/css/style.css"/>
+  {% block extra_head %}{% endblock %}
+</head>
+<body class="bg-surface text-on-surface font-sans min-h-screen flex flex-col antialiased">
+
+  <!-- TOP HEADER -->
+  <header class="sticky top-0 z-50 bg-white border-b border-outline-variant shadow-sm">
+    <!-- Top Announcement Bar -->
+    <div class="bg-primary text-white text-xs py-1.5 px-4">
+      <div class="max-w-7xl mx-auto flex items-center justify-between">
+        <span class="font-medium flex items-center gap-1.5">
+          <span class="material-symbols-outlined text-[15px]">local_shipping</span>
+          Cash on Delivery Available Nationwide • 100% Verified Safe Delivery
+        </span>
+        <div class="hidden md:flex items-center gap-6 text-xs text-blue-100">
+          <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">verified</span> Genuine Authentic Products</span>
+          <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">support_agent</span> 24/7 Doorstep Support</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Navigation Bar -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5">
+      <div class="flex items-center justify-between gap-4">
+        
+        <!-- Logo -->
+        <a href="{% url 'home' %}" class="flex items-center gap-2 shrink-0 group">
+          <div class="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-white shadow-md shadow-primary/30 group-hover:bg-primary-hover transition-colors">
+            <span class="material-symbols-outlined text-[24px]">shopping_bag</span>
+          </div>
+          <span class="font-bold text-2xl tracking-tight text-gray-900 group-hover:text-primary transition-colors">Shop<span class="text-primary">Sphere</span></span>
+        </a>
+
+        <!-- Search Bar -->
+        <form action="{% url 'product_list' %}" method="GET" class="flex-1 max-w-2xl hidden md:flex items-center">
+          <div class="w-full flex items-center bg-gray-50 border border-outline-variant rounded-xl p-1 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all">
+            <select name="category" class="bg-transparent text-gray-700 text-xs font-semibold px-3 py-2 border-r border-outline-variant outline-none cursor-pointer">
+              <option value="all">All Departments</option>
+              {% for cat in nav_categories %}
+                <option value="{{ cat.slug }}" {% if request.GET.category == cat.slug %}selected{% endif %}>{{ cat.name }}</option>
+              {% endfor %}
+            </select>
+            <input type="text" name="q" value="{{ request.GET.q|default:'' }}" placeholder="Search products, brands, models..." class="w-full bg-transparent px-3 py-2 text-sm text-gray-800 placeholder-gray-400 outline-none"/>
+            <button type="submit" class="bg-primary hover:bg-primary-hover text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center justify-center transition-colors shadow-sm">
+              <span class="material-symbols-outlined text-[18px]">search</span>
+            </button>
+          </div>
+        </form>
+
+        <!-- Navigation Links & User Actions -->
+        <div class="flex items-center gap-3 sm:gap-4 shrink-0">
+          <nav class="hidden lg:flex items-center gap-6 font-medium text-sm text-gray-600">
+            <a href="{% url 'home' %}" class="hover:text-primary transition-colors {% if request.resolver_match.url_name == 'home' %}text-primary font-semibold{% endif %}">Home</a>
+            <a href="{% url 'product_list' %}" class="hover:text-primary transition-colors {% if request.resolver_match.url_name == 'product_list' %}text-primary font-semibold{% endif %}">Products</a>
+            {% if user.is_authenticated %}
+              <a href="{% url 'order_history' %}" class="hover:text-primary transition-colors {% if request.resolver_match.url_name == 'order_history' %}text-primary font-semibold{% endif %}">My Orders</a>
+            {% endif %}
+          </nav>
+
+          <!-- User Authentication Dropdown / Buttons -->
+          {% if user.is_authenticated %}
+            <div class="relative group">
+              <button type="button" class="flex items-center gap-2 p-1.5 rounded-lg hover:bg-gray-100 transition-colors text-sm font-medium text-gray-700">
+                <div class="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold">
+                  {{ user.first_name|default:user.username|slice:":1"|upper }}
+                </div>
+                <span class="hidden sm:inline">{{ user.first_name|default:user.username }}</span>
+                <span class="material-symbols-outlined text-[18px] text-gray-400">expand_more</span>
+              </button>
+              
+              <!-- Dropdown Content -->
+              <div class="absolute right-0 mt-1 w-48 bg-white rounded-xl shadow-lg border border-outline-variant py-2 hidden group-hover:block hover:block z-50">
+                <div class="px-4 py-2 border-b border-gray-100">
+                  <p class="text-xs text-gray-500">Signed in as</p>
+                  <p class="text-sm font-semibold text-gray-900 truncate">{{ user.email|default:user.username }}</p>
+                </div>
+                <a href="{% url 'user_profile' %}" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-primary">
+                  <span class="material-symbols-outlined text-[18px]">person</span> Profile Settings
+                </a>
+                <a href="{% url 'order_history' %}" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-primary">
+                  <span class="material-symbols-outlined text-[18px]">receipt_long</span> My Orders
+                </a>
+                {% if user.is_staff %}
+                  <a href="{% url 'admin:index' %}" target="_blank" class="flex items-center gap-2 px-4 py-2 text-sm text-amber-700 hover:bg-amber-50">
+                    <span class="material-symbols-outlined text-[18px]">admin_panel_settings</span> Django Admin
+                  </a>
+                {% endif %}
+                <div class="border-t border-gray-100 my-1"></div>
+                <a href="{% url 'logout' %}" class="flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50">
+                  <span class="material-symbols-outlined text-[18px]">logout</span> Sign Out
+                </a>
+              </div>
+            </div>
+          {% else %}
+            <div class="flex items-center gap-2 text-sm font-medium">
+              <a href="{% url 'login' %}" class="px-3 py-2 rounded-lg text-gray-700 hover:text-primary hover:bg-gray-50 transition-colors">Sign In</a>
+              <a href="{% url 'register' %}" class="hidden sm:inline-block px-3.5 py-1.5 rounded-lg bg-primary hover:bg-primary-hover text-white shadow-sm transition-colors">Register</a>
+            </div>
+          {% endif %}
+
+          <!-- Cart Trigger Button -->
+          <a href="{% url 'cart' %}" class="relative flex items-center justify-center p-2 rounded-xl bg-gray-50 border border-outline-variant hover:bg-primary/5 hover:border-primary transition-all text-gray-800" title="Shopping Cart">
+            <span class="material-symbols-outlined text-[24px]">shopping_bag</span>
+            <span id="nav-cart-badge" class="absolute -top-1.5 -right-1.5 min-w-[20px] h-[20px] rounded-full bg-primary text-white text-[11px] font-bold flex items-center justify-center px-1 shadow-sm">
+              {{ cart_count }}
+            </span>
+          </a>
+        </div>
+
+      </div>
+
+      <!-- Mobile Search Form -->
+      <form action="{% url 'product_list' %}" method="GET" class="mt-3 md:hidden">
+        <div class="flex items-center bg-gray-50 border border-outline-variant rounded-xl p-1">
+          <input type="text" name="q" value="{{ request.GET.q|default:'' }}" placeholder="Search products..." class="w-full bg-transparent px-3 py-1.5 text-sm text-gray-800 outline-none"/>
+          <button type="submit" class="bg-primary text-white p-2 rounded-lg">
+            <span class="material-symbols-outlined text-[18px]">search</span>
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Category Sub-Nav Bar -->
+    <div class="bg-gray-50/80 border-t border-outline-variant px-4 sm:px-6 lg:px-8 py-2">
+      <div class="max-w-7xl mx-auto flex items-center justify-between gap-4 overflow-x-auto text-xs font-medium text-gray-600 scrollbar-none">
+        <div class="flex items-center gap-6 shrink-0">
+          <span class="text-gray-400 uppercase tracking-wider font-semibold">Explore:</span>
+          {% for cat in nav_categories %}
+            <a href="{% url 'product_list' %}?category={{ cat.slug }}" class="hover:text-primary transition-colors flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-[16px] text-primary">{{ cat.icon_name|default:'category' }}</span>
+              {{ cat.name }}
+            </a>
+          {% endfor %}
+        </div>
+        <div class="hidden sm:flex items-center gap-2 text-secondary font-semibold shrink-0">
+          <span class="material-symbols-outlined text-[16px]">bolt</span>
+          <span>Fast Doorstep Dispatch in 24h</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ALERTS / FLASH MESSAGES -->
+  {% if messages %}
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 w-full">
+      {% for message in messages %}
+        <div class="flex items-center justify-between p-4 mb-3 rounded-xl border {% if message.tags == 'error' %}bg-red-50 border-red-200 text-red-800{% elif message.tags == 'success' %}bg-emerald-50 border-emerald-200 text-emerald-800{% elif message.tags == 'warning' %}bg-amber-50 border-amber-200 text-amber-800{% else %}bg-blue-50 border-blue-200 text-blue-800{% endif %} shadow-sm animate-fade-in" role="alert">
+          <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-[20px]">
+              {% if message.tags == 'error' %}error{% elif message.tags == 'success' %}check_circle{% elif message.tags == 'warning' %}warning{% else %}info{% endif %}
+            </span>
+            <span class="text-sm font-medium">{{ message }}</span>
+          </div>
+          <button type="button" onclick="this.parentElement.remove()" class="text-gray-400 hover:text-gray-600 p-1">
+            <span class="material-symbols-outlined text-[18px]">close</span>
+          </button>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <!-- MAIN PAGE CONTENT -->
+  <main class="flex-1 w-full">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="bg-gray-900 text-gray-300 mt-16 border-t border-gray-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+        
+        <!-- Brand Info -->
+        <div class="space-y-4">
+          <div class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-white font-bold">
+              <span class="material-symbols-outlined text-[20px]">shopping_bag</span>
+            </div>
+            <span class="font-bold text-xl text-white">Shop<span class="text-primary">Sphere</span></span>
+          </div>
+          <p class="text-sm text-gray-400 leading-relaxed">
+            Next-generation retail platform offering authentic electronics, lifestyle apparel, and home essentials with verified Cash on Delivery.
+          </p>
+          <div class="flex items-center gap-2 text-xs text-emerald-400 font-medium">
+            <span class="material-symbols-outlined text-[16px]">payments</span>
+            <span>Zero Advance Payment • Pay on Inspection</span>
+          </div>
+        </div>
+
+        <!-- Shop Departments -->
+        <div>
+          <h4 class="text-white text-sm font-semibold tracking-wider uppercase mb-4">Shop Departments</h4>
+          <ul class="space-y-2 text-sm">
+            {% for cat in nav_categories %}
+              <li>
+                <a href="{% url 'product_list' %}?category={{ cat.slug }}" class="hover:text-white transition-colors">{{ cat.name }}</a>
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+
+        <!-- Customer Care -->
+        <div>
+          <h4 class="text-white text-sm font-semibold tracking-wider uppercase mb-4">Customer Care</h4>
+          <ul class="space-y-2 text-sm">
+            <li><a href="{% url 'order_history' %}" class="hover:text-white transition-colors">Track Orders</a></li>
+            <li><a href="#" class="hover:text-white transition-colors">Cash on Delivery FAQ</a></li>
+            <li><a href="#" class="hover:text-white transition-colors">7-Day Return Guarantee</a></li>
+            <li><a href="#" class="hover:text-white transition-colors">Support & Warranty</a></li>
+          </ul>
+        </div>
+
+        <!-- Trust Badges & Contact -->
+        <div>
+          <h4 class="text-white text-sm font-semibold tracking-wider uppercase mb-4">100% Secure Shopping</h4>
+          <p class="text-sm text-gray-400 mb-4">
+            Orders are fulfilled with real-time stock allocation and verified tamper-evident logistics.
+          </p>
+          <div class="p-3 rounded-xl bg-gray-800 border border-gray-700 space-y-2">
+            <div class="flex items-center gap-2 text-xs text-gray-300">
+              <span class="material-symbols-outlined text-emerald-400 text-[18px]">verified_user</span>
+              <span>Tamper-proof packaging</span>
+            </div>
+            <div class="flex items-center gap-2 text-xs text-gray-300">
+              <span class="material-symbols-outlined text-blue-400 text-[18px]">local_shipping</span>
+              <span>Doorstep verification available</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Bottom Bar -->
+      <div class="border-t border-gray-800 mt-12 pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-gray-500 gap-4">
+        <p>© 2026 ShopSphere E-Commerce. All rights reserved.</p>
+        <p class="flex items-center gap-1">
+          Crafted with Django, SQLite, and Tailwind CSS.
+        </p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Toast Notification Modal / Bubble -->
+  <div id="toast-container" class="fixed bottom-5 right-5 z-50 space-y-2 pointer-events-none"></div>
+
+  <script src="/static/js/main.js"></script>
+  {% block extra_scripts %}{% endblock %}
+</body>
+</html>

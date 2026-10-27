@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+
+{% block title %}Order Confirmed #{{ order.order_number }} - ShopSphere{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
+
+  <!-- SUCCESS BANNER -->
+  <div class="bg-white border border-outline-variant rounded-3xl p-8 sm:p-10 shadow-xs text-center space-y-5">
+    
+    <div class="w-20 h-20 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto shadow-sm">
+      <span class="material-symbols-outlined text-[44px]">check_circle</span>
+    </div>
+
+    <div class="space-y-2">
+      <span class="text-xs font-bold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full uppercase tracking-wider">
+        Cash on Delivery Confirmed
+      </span>
+      <h1 class="text-3xl sm:text-4xl font-extrabold text-gray-900 tracking-tight">
+        Order Placed Successfully!
+      </h1>
+      <p class="text-sm text-gray-500 max-w-lg mx-auto">
+        Thank you for shopping with ShopSphere. Your order has been registered, stock reserved atomically, and dispatched for packaging.
+      </p>
+    </div>
+
+    <!-- Order Number Badge -->
+    <div class="inline-flex items-center gap-3 bg-gray-50 border border-outline-variant px-5 py-2.5 rounded-2xl">
+      <span class="text-xs text-gray-500 font-semibold uppercase">Order Reference:</span>
+      <span class="text-base font-extrabold text-primary tracking-wide">#{{ order.order_number }}</span>
+    </div>
+
+    <!-- Primary Action Buttons -->
+    <div class="flex flex-wrap items-center justify-center gap-4 pt-3">
+      <a href="{% url 'order_detail' order.order_number %}" class="inline-flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-6 py-3 rounded-xl font-bold text-sm shadow-md transition-colors">
+        <span class="material-symbols-outlined text-[18px]">receipt_long</span>
+        <span>View Order Details</span>
+      </a>
+      <a href="{% url 'product_list' %}" class="inline-flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-800 px-6 py-3 rounded-xl font-bold text-sm transition-colors">
+        <span class="material-symbols-outlined text-[18px]">storefront</span>
+        <span>Continue Shopping</span>
+      </a>
+    </div>
+
+  </div>
+
+  <!-- ORDER SUMMARY CARD -->
+  <div class="bg-white border border-outline-variant rounded-3xl p-6 sm:p-8 shadow-xs space-y-6">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-gray-100 gap-2">
+      <div>
+        <h2 class="text-lg font-bold text-gray-900">Order Details Breakdown</h2>
+        <p class="text-xs text-gray-500">Placed on {{ order.created_at|date:"d M Y, h:i A" }}</p>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-800">Status: {{ order.status }}</span>
+        <span class="px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800">Payment: {{ order.payment_status }} (COD)</span>
+      </div>
+    </div>
+
+    <!-- Delivery Address Details -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 p-4 bg-gray-50 rounded-2xl text-xs">
+      <div>
+        <span class="font-bold text-gray-500 uppercase tracking-wider block mb-1">Delivering To:</span>
+        <p class="font-bold text-sm text-gray-900">{{ order.full_name }}</p>
+        <p class="text-gray-600 mt-1">{{ order.address }}</p>
+        <p class="text-gray-600">{{ order.city }}, {{ order.state }} - {{ order.postal_code }}</p>
+        <p class="text-gray-700 font-semibold mt-1">Phone: {{ order.phone }}</p>
+      </div>
+
+      <div>
+        <span class="font-bold text-gray-500 uppercase tracking-wider block mb-1">Payment & Instructions:</span>
+        <p class="text-gray-900 font-semibold">{{ order.payment_method }}</p>
+        <p class="text-emerald-700 font-bold mt-1">Pay ₹{{ order.total|floatformat:2 }} in cash or UPI upon delivery.</p>
+        {% if order.notes %}
+          <p class="text-gray-500 mt-2 italic">Note: "{{ order.notes }}"</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Ordered Items Table -->
+    <div class="space-y-3">
+      <h3 class="text-xs font-bold uppercase tracking-wider text-gray-500">Items Ordered</h3>
+      <div class="border border-outline-variant rounded-xl divide-y divide-gray-100 overflow-hidden">
+        {% for item in order.items.all %}
+          <div class="p-4 flex items-center justify-between gap-4 text-xs">
+            <div class="flex items-center gap-3">
+              {% if item.product and item.product.image_url %}
+                <img src="{{ item.product.get_image_url }}" alt="{{ item.product_name }}" class="w-12 h-12 rounded-lg object-cover bg-gray-50 border border-outline-variant"/>
+              {% else %}
+                <div class="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center text-gray-400">
+                  <span class="material-symbols-outlined text-[20px]">inventory_2</span>
+                </div>
+              {% endif %}
+              <div>
+                <p class="font-bold text-sm text-gray-900">{{ item.product_name }}</p>
+                <p class="text-gray-500">Unit: ₹{{ item.unit_price|floatformat:2 }} × {{ item.quantity }}</p>
+              </div>
+            </div>
+            <span class="font-bold text-sm text-gray-900">₹{{ item.line_total|floatformat:2 }}</span>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Final Total -->
+    <div class="border-t border-gray-100 pt-4 flex flex-col sm:flex-row justify-between items-start sm:items-center text-xs text-gray-600 gap-4">
+      <div>
+        <span>Express Doorstep Delivery: <strong class="text-emerald-600">FREE</strong></span>
+      </div>
+      <div class="text-right">
+        <span class="text-gray-500">Total COD Amount:</span>
+        <span class="text-2xl font-extrabold text-primary ml-2">₹{{ order.total|floatformat:2 }}</span>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+{% endblock %}

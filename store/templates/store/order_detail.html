@@ -1,0 +1,173 @@
+{% extends 'base.html' %}
+
+{% block title %}Order #{{ order.order_number }} - ShopSphere{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8">
+
+  <!-- Breadcrumbs -->
+  <nav class="flex items-center gap-2 text-xs text-gray-500 font-medium">
+    <a href="{% url 'home' %}" class="hover:text-primary transition-colors flex items-center gap-1">
+      <span class="material-symbols-outlined text-[15px]">home</span> Home
+    </a>
+    <span class="text-gray-300">/</span>
+    <a href="{% url 'order_history' %}" class="hover:text-primary transition-colors">My Orders</a>
+    <span class="text-gray-300">/</span>
+    <span class="text-gray-900 font-semibold">#{{ order.order_number }}</span>
+  </nav>
+
+  <!-- Order Title Bar -->
+  <div class="bg-white border border-outline-variant rounded-2xl p-6 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div class="space-y-1">
+      <div class="flex items-center gap-3">
+        <h1 class="text-2xl font-extrabold text-gray-900">Order #{{ order.order_number }}</h1>
+        
+        {% if order.status == 'Placed' %}
+          <span class="px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-800">Placed</span>
+        {% elif order.status == 'Processing' %}
+          <span class="px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800">Processing</span>
+        {% elif order.status == 'Shipped' %}
+          <span class="px-3 py-1 rounded-full text-xs font-bold bg-purple-100 text-purple-800">Shipped</span>
+        {% elif order.status == 'Delivered' %}
+          <span class="px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">Delivered</span>
+        {% elif order.status == 'Cancelled' %}
+          <span class="px-3 py-1 rounded-full text-xs font-bold bg-red-100 text-red-800">Cancelled</span>
+        {% endif %}
+      </div>
+      <p class="text-xs text-gray-500">Ordered on {{ order.created_at|date:"l, d F Y at h:i A" }}</p>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <a href="{% url 'order_history' %}" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl border border-outline-variant text-xs font-semibold text-gray-700 hover:bg-gray-50 transition-colors">
+        <span class="material-symbols-outlined text-[16px]">arrow_back</span>
+        <span>Back to Orders</span>
+      </a>
+      <button onclick="window.print()" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-xs font-semibold text-gray-800 transition-colors">
+        <span class="material-symbols-outlined text-[16px]">print</span>
+        <span>Print</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Status Progress Track -->
+  <div class="bg-white border border-outline-variant rounded-2xl p-6 shadow-xs">
+    <h3 class="text-xs font-bold uppercase tracking-wider text-gray-500 mb-6">Delivery Milestone Tracker</h3>
+    <div class="grid grid-cols-4 gap-2 text-center text-xs">
+      <div class="space-y-2">
+        <div class="w-8 h-8 rounded-full bg-emerald-600 text-white flex items-center justify-center mx-auto shadow-xs font-bold">
+          <span class="material-symbols-outlined text-[18px]">check</span>
+        </div>
+        <span class="font-bold text-gray-900 block">Placed</span>
+        <span class="text-[10px] text-gray-400">Order Confirmed</span>
+      </div>
+
+      <div class="space-y-2">
+        <div class="w-8 h-8 rounded-full {% if order.status in 'Processing,Shipped,Delivered' %}bg-emerald-600 text-white{% else %}bg-gray-200 text-gray-500{% endif %} flex items-center justify-center mx-auto font-bold">
+          <span class="material-symbols-outlined text-[18px]">inventory</span>
+        </div>
+        <span class="font-bold {% if order.status in 'Processing,Shipped,Delivered' %}text-gray-900{% else %}text-gray-400{% endif %} block">Processing</span>
+        <span class="text-[10px] text-gray-400">Packaging</span>
+      </div>
+
+      <div class="space-y-2">
+        <div class="w-8 h-8 rounded-full {% if order.status in 'Shipped,Delivered' %}bg-emerald-600 text-white{% else %}bg-gray-200 text-gray-500{% endif %} flex items-center justify-center mx-auto font-bold">
+          <span class="material-symbols-outlined text-[18px]">local_shipping</span>
+        </div>
+        <span class="font-bold {% if order.status in 'Shipped,Delivered' %}text-gray-900{% else %}text-gray-400{% endif %} block">Shipped</span>
+        <span class="text-[10px] text-gray-400">In Transit</span>
+      </div>
+
+      <div class="space-y-2">
+        <div class="w-8 h-8 rounded-full {% if order.status == 'Delivered' %}bg-emerald-600 text-white{% else %}bg-gray-200 text-gray-500{% endif %} flex items-center justify-center mx-auto font-bold">
+          <span class="material-symbols-outlined text-[18px]">home</span>
+        </div>
+        <span class="font-bold {% if order.status == 'Delivered' %}text-gray-900{% else %}text-gray-400{% endif %} block">Delivered</span>
+        <span class="text-[10px] text-gray-400">Handover Complete</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delivery & Payment Bento Grid -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    
+    <!-- Shipping Address Card -->
+    <div class="bg-white border border-outline-variant rounded-2xl p-6 shadow-xs space-y-3">
+      <h3 class="text-xs font-bold uppercase tracking-wider text-gray-500 flex items-center gap-1.5">
+        <span class="material-symbols-outlined text-primary text-[18px]">location_on</span>
+        <span>Delivery Address</span>
+      </h3>
+      <div class="text-xs space-y-1 text-gray-700">
+        <p class="font-bold text-sm text-gray-900">{{ order.full_name }}</p>
+        <p>{{ order.address }}</p>
+        <p>{{ order.city }}, {{ order.state }} - {{ order.postal_code }}</p>
+        <p class="font-semibold text-gray-900 pt-1">Phone: {{ order.phone }}</p>
+        {% if order.notes %}
+          <p class="pt-2 italic text-gray-500">Note: "{{ order.notes }}"</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Payment Info Card -->
+    <div class="bg-white border border-outline-variant rounded-2xl p-6 shadow-xs space-y-3">
+      <h3 class="text-xs font-bold uppercase tracking-wider text-gray-500 flex items-center gap-1.5">
+        <span class="material-symbols-outlined text-emerald-600 text-[18px]">payments</span>
+        <span>Payment Breakdown</span>
+      </h3>
+      <div class="text-xs space-y-2 text-gray-700">
+        <div class="flex justify-between">
+          <span>Payment Method:</span>
+          <span class="font-bold text-gray-900">{{ order.payment_method }}</span>
+        </div>
+        <div class="flex justify-between">
+          <span>Payment Status:</span>
+          <span class="font-bold {% if order.payment_status == 'Paid' %}text-emerald-600{% else %}text-amber-600{% endif %}">{{ order.payment_status }}</span>
+        </div>
+        <div class="border-t border-gray-100 pt-2 flex justify-between items-baseline">
+          <span class="text-sm font-bold text-gray-900">Total COD Amount:</span>
+          <span class="text-xl font-extrabold text-primary">₹{{ order.total|floatformat:2 }}</span>
+        </div>
+        <p class="text-[11px] text-gray-400 leading-normal pt-1">
+          Pay in cash or digital UPI upon arrival. Inspect your parcel before completing payment.
+        </p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Ordered Items Table -->
+  <div class="bg-white border border-outline-variant rounded-2xl p-6 shadow-xs space-y-4">
+    <h3 class="text-base font-bold text-gray-900 pb-3 border-b border-gray-100">
+      Ordered Items ({{ order.items.count }})
+    </h3>
+
+    <div class="divide-y divide-gray-100">
+      {% for item in order.items.all %}
+        <div class="py-4 first:pt-0 last:pb-0 flex items-center justify-between gap-4 text-xs">
+          <div class="flex items-center gap-3">
+            {% if item.product and item.product.image_url %}
+              <img src="{{ item.product.get_image_url }}" alt="{{ item.product_name }}" class="w-14 h-14 rounded-xl object-cover bg-gray-50 border border-outline-variant"/>
+            {% else %}
+              <div class="w-14 h-14 rounded-xl bg-gray-100 flex items-center justify-center text-gray-400">
+                <span class="material-symbols-outlined text-[20px]">inventory_2</span>
+              </div>
+            {% endif %}
+            <div>
+              <p class="font-bold text-sm text-gray-900">
+                {% if item.product %}
+                  <a href="{% url 'product_detail' item.product.slug %}" class="hover:text-primary transition-colors">{{ item.product_name }}</a>
+                {% else %}
+                  {{ item.product_name }}
+                {% endif %}
+              </p>
+              <p class="text-gray-500">Unit Price: ₹{{ item.unit_price|floatformat:2 }}</p>
+              <p class="text-gray-500">Quantity: {{ item.quantity }}</p>
+            </div>
+          </div>
+          <span class="font-bold text-base text-gray-900">₹{{ item.line_total|floatformat:2 }}</span>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+
+</div>
+{% endblock %}

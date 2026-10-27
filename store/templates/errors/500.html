@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block title %}Internal Server Error (500) - ShopSphere{% endblock %}
+
+{% block content %}
+<div class="min-h-[60vh] flex items-center justify-center px-4 py-16">
+  <div class="bg-white border border-outline-variant rounded-3xl p-10 text-center max-w-md w-full space-y-4 shadow-xs">
+    <div class="w-16 h-16 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center mx-auto">
+      <span class="material-symbols-outlined text-[36px]">dns</span>
+    </div>
+    <h1 class="text-3xl font-extrabold text-gray-900">Server Error</h1>
+    <p class="text-xs text-gray-500">Something went wrong on our servers. Our technical team has been notified. Please try again shortly.</p>
+    <a href="{% url 'home' %}" class="inline-block bg-primary hover:bg-primary-hover text-white text-xs font-bold px-6 py-2.5 rounded-xl shadow-xs transition-colors">
+      Back to Home
+    </a>
+  </div>
+</div>
+{% endblock %}

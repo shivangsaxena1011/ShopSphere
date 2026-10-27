@@ -1,0 +1,159 @@
+{% extends 'base.html' %}
+
+{% block title %}My Orders History - ShopSphere{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8">
+
+  <!-- Top Breadcrumbs -->
+  <nav class="flex items-center gap-2 text-xs text-gray-500 font-medium">
+    <a href="{% url 'home' %}" class="hover:text-primary transition-colors flex items-center gap-1">
+      <span class="material-symbols-outlined text-[15px]">home</span> Home
+    </a>
+    <span class="text-gray-300">/</span>
+    <span class="text-gray-900 font-semibold">My Orders</span>
+  </nav>
+
+  <!-- Title & Metric Highlight Bento Bar -->
+  <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-6 pb-2">
+    <div class="space-y-2">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-primary text-xs font-bold uppercase tracking-wider border border-blue-200">
+        <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+        <span>Order Fulfillment History</span>
+      </div>
+      <div class="flex items-baseline gap-3">
+        <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">My Orders</h1>
+        <span class="text-xs font-bold text-gray-600 bg-gray-100 px-2.5 py-1 rounded-lg">{{ total_orders_count }} Recorded</span>
+      </div>
+      <p class="text-xs text-gray-500 max-w-xl">
+        Review, track, and manage your recent purchases. Cash on Delivery orders can be physically inspected at your doorstep before paying.
+      </p>
+    </div>
+
+    <!-- Quick Stats Bento Box -->
+    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 bg-white p-3 rounded-2xl border border-outline-variant shadow-xs">
+      <div class="p-3 rounded-xl bg-gray-50 flex flex-col justify-center">
+        <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Active COD</span>
+        <span class="text-lg font-extrabold text-primary mt-0.5">₹{{ active_cod_total|floatformat:2 }}</span>
+      </div>
+      <div class="p-3 rounded-xl bg-gray-50 flex flex-col justify-center">
+        <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Delivered</span>
+        <span class="text-lg font-extrabold text-emerald-600 mt-0.5">{{ delivered_count }} Parcels</span>
+      </div>
+      <div class="col-span-2 sm:col-span-1 p-3 rounded-xl bg-gray-50 flex flex-col justify-center">
+        <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Returns / Repl.</span>
+        <span class="text-lg font-extrabold text-gray-800 mt-0.5">₹0.00</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filter Tabs Navigation -->
+  <div class="flex items-center gap-2 overflow-x-auto p-1.5 bg-gray-100 rounded-2xl border border-outline-variant text-xs font-bold scrollbar-none">
+    <a href="{% url 'order_history' %}?status=all" class="px-4 py-2 rounded-xl transition-all {% if current_status == 'all' %}bg-primary text-white shadow-xs{% else %}text-gray-600 hover:text-gray-900 hover:bg-white{% endif %}">
+      All Orders
+    </a>
+    <a href="{% url 'order_history' %}?status=pending" class="px-4 py-2 rounded-xl transition-all {% if current_status == 'pending' %}bg-primary text-white shadow-xs{% else %}text-gray-600 hover:text-gray-900 hover:bg-white{% endif %}">
+      Pending / Placed
+    </a>
+    <a href="{% url 'order_history' %}?status=processing" class="px-4 py-2 rounded-xl transition-all {% if current_status == 'processing' %}bg-primary text-white shadow-xs{% else %}text-gray-600 hover:text-gray-900 hover:bg-white{% endif %}">
+      Processing
+    </a>
+    <a href="{% url 'order_history' %}?status=delivered" class="px-4 py-2 rounded-xl transition-all {% if current_status == 'delivered' %}bg-primary text-white shadow-xs{% else %}text-gray-600 hover:text-gray-900 hover:bg-white{% endif %}">
+      Delivered
+    </a>
+    <a href="{% url 'order_history' %}?status=cancelled" class="px-4 py-2 rounded-xl transition-all {% if current_status == 'cancelled' %}bg-primary text-white shadow-xs{% else %}text-gray-600 hover:text-gray-900 hover:bg-white{% endif %}">
+      Cancelled
+    </a>
+  </div>
+
+  <!-- Orders Listing -->
+  {% if orders %}
+    <div class="space-y-6">
+      {% for order in orders %}
+        <div class="bg-white border border-outline-variant rounded-2xl p-6 shadow-xs hover:border-primary/40 transition-all space-y-4">
+          
+          <!-- Order Card Header -->
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-gray-100 gap-3">
+            <div class="space-y-1">
+              <div class="flex items-center gap-3">
+                <span class="text-base font-extrabold text-gray-900">#{{ order.order_number }}</span>
+                
+                <!-- Status Badge -->
+                {% if order.status == 'Placed' %}
+                  <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-blue-100 text-blue-800">Placed</span>
+                {% elif order.status == 'Processing' %}
+                  <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800">Processing</span>
+                {% elif order.status == 'Shipped' %}
+                  <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-purple-100 text-purple-800">Shipped</span>
+                {% elif order.status == 'Delivered' %}
+                  <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800">Delivered</span>
+                {% elif order.status == 'Cancelled' %}
+                  <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-red-100 text-red-800">Cancelled</span>
+                {% endif %}
+
+                <span class="text-xs text-gray-500 font-medium bg-gray-50 px-2 py-0.5 rounded">{{ order.payment_method }}</span>
+              </div>
+              <p class="text-xs text-gray-400">Placed on {{ order.created_at|date:"d M Y, h:i A" }}</p>
+            </div>
+
+            <div class="text-left sm:text-right">
+              <span class="text-xs text-gray-400 block">Total Amount</span>
+              <span class="text-lg font-extrabold text-primary">₹{{ order.total|floatformat:2 }}</span>
+            </div>
+          </div>
+
+          <!-- Items Summary in Order -->
+          <div class="space-y-2">
+            <h4 class="text-xs font-bold uppercase tracking-wider text-gray-500">Order Items ({{ order.items.count }})</h4>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {% for item in order.items.all %}
+                <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl border border-outline-variant/60">
+                  {% if item.product and item.product.image_url %}
+                    <img src="{{ item.product.get_image_url }}" alt="{{ item.product_name }}" class="w-12 h-12 rounded-lg object-cover bg-white shrink-0 border border-outline-variant"/>
+                  {% else %}
+                    <div class="w-12 h-12 rounded-lg bg-white border border-outline-variant flex items-center justify-center text-gray-400 shrink-0">
+                      <span class="material-symbols-outlined text-[18px]">inventory_2</span>
+                    </div>
+                  {% endif %}
+                  <div class="min-w-0 flex-1">
+                    <p class="font-bold text-xs text-gray-900 truncate">{{ item.product_name }}</p>
+                    <p class="text-[11px] text-gray-500">Qty: {{ item.quantity }} × ₹{{ item.unit_price|floatformat:2 }}</p>
+                  </div>
+                  <span class="font-bold text-xs text-gray-800">₹{{ item.line_total|floatformat:2 }}</span>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+
+          <!-- Card Footer & View Details Link -->
+          <div class="border-t border-gray-100 pt-3 flex items-center justify-between text-xs">
+            <span class="text-gray-500">
+              Ship to: <strong>{{ order.city }}, {{ order.state }}</strong>
+            </span>
+            <a href="{% url 'order_detail' order.order_number %}" class="inline-flex items-center gap-1 font-bold text-primary hover:text-primary-hover transition-colors">
+              <span>View Full Details</span>
+              <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+            </a>
+          </div>
+
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <!-- No Orders Matching Filter -->
+    <div class="bg-white border border-outline-variant rounded-3xl p-12 text-center space-y-4 shadow-xs max-w-lg mx-auto">
+      <div class="w-16 h-16 rounded-full bg-blue-50 text-primary flex items-center justify-center mx-auto">
+        <span class="material-symbols-outlined text-[32px]">receipt_long</span>
+      </div>
+      <h3 class="text-lg font-bold text-gray-900">No orders found</h3>
+      <p class="text-xs text-gray-500">
+        You don't have any orders matching the selected filter status.
+      </p>
+      <a href="{% url 'product_list' %}" class="inline-block bg-primary hover:bg-primary-hover text-white text-xs font-bold px-6 py-2.5 rounded-xl transition-colors shadow-sm">
+        Start Shopping Now
+      </a>
+    </div>
+  {% endif %}
+
+</div>
+{% endblock %}

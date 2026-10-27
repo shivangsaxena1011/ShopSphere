@@ -1,0 +1,215 @@
+{% extends 'base.html' %}
+
+{% block title %}Checkout - Cash on Delivery | ShopSphere{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8">
+
+  <!-- Progress Stepper -->
+  <div class="bg-white border border-outline-variant rounded-2xl p-4 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div class="flex items-center gap-2 text-xs font-medium text-gray-500">
+      <a href="{% url 'home' %}" class="hover:text-primary transition-colors flex items-center gap-1">
+        <span class="material-symbols-outlined text-[15px]">home</span> Home
+      </a>
+      <span class="text-gray-300">/</span>
+      <a href="{% url 'cart' %}" class="hover:text-primary transition-colors">Cart</a>
+      <span class="text-gray-300">/</span>
+      <span class="text-gray-900 font-semibold">Checkout (Cash on Delivery)</span>
+    </div>
+
+    <!-- Stepper Pills -->
+    <div class="flex items-center gap-2 text-xs font-semibold">
+      <div class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800">
+        <span class="material-symbols-outlined text-[14px]">check_circle</span>
+        <span>1. Cart Reviewed</span>
+      </div>
+      <div class="w-4 h-0.5 bg-gray-200"></div>
+      <div class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary text-white shadow-xs">
+        <span class="material-symbols-outlined text-[14px]">local_shipping</span>
+        <span>2. Delivery & COD</span>
+      </div>
+      <div class="w-4 h-0.5 bg-gray-200"></div>
+      <div class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-gray-100 text-gray-400">
+        <span class="material-symbols-outlined text-[14px]">verified</span>
+        <span>3. Confirmation</span>
+      </div>
+    </div>
+  </div>
+
+  <form method="POST" action="{% url 'checkout' %}" class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+    {% csrf_token %}
+
+    <!-- LEFT COLUMN: Delivery Details & Payment Method (Span 8) -->
+    <div class="lg:col-span-8 space-y-6">
+      
+      <!-- 1. Shipping Address Section -->
+      <div class="bg-white border border-outline-variant rounded-2xl p-6 shadow-xs space-y-5">
+        <div class="flex items-center justify-between pb-3 border-b border-gray-100">
+          <h2 class="text-lg font-bold text-gray-900 flex items-center gap-2">
+            <span class="w-7 h-7 rounded-lg bg-primary text-white flex items-center justify-center text-xs font-bold">1</span>
+            <span>Shipping & Delivery Address</span>
+          </h2>
+          <span class="text-xs text-gray-500">* All fields required</span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <!-- Full Name -->
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-gray-600 mb-1.5">Full Name</label>
+            {{ form.full_name }}
+            {% if form.full_name.errors %}
+              <p class="text-xs text-red-600 mt-1">{{ form.full_name.errors.0 }}</p>
+            {% endif %}
+          </div>
+
+          <!-- Phone Number -->
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-gray-600 mb-1.5">Phone Number (For COD Delivery OTP)</label>
+            {{ form.phone }}
+            {% if form.phone.errors %}
+              <p class="text-xs text-red-600 mt-1">{{ form.phone.errors.0 }}</p>
+            {% endif %}
+          </div>
+
+          <!-- Street Address -->
+          <div class="sm:col-span-2">
+            <label class="block text-xs font-bold uppercase tracking-wider text-gray-600 mb-1.5">Delivery Address (House/Flat No, Street, Colony, Landmark)</label>
+            {{ form.address }}
+            {% if form.address.errors %}
+              <p class="text-xs text-red-600 mt-1">{{ form.address.errors.0 }}</p>
+            {% endif %}
+          </div>
+
+          <!-- City -->
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-gray-600 mb-1.5">City</label>
+            {{ form.city }}
+            {% if form.city.errors %}
+              <p class="text-xs text-red-600 mt-1">{{ form.city.errors.0 }}</p>
+            {% endif %}
+          </div>
+
+          <!-- State -->
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-gray-600 mb-1.5">State</label>
+            {{ form.state }}
+            {% if form.state.errors %}
+              <p class="text-xs text-red-600 mt-1">{{ form.state.errors.0 }}</p>
+            {% endif %}
+          </div>
+
+          <!-- Postal Code -->
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-gray-600 mb-1.5">PIN / Postal Code</label>
+            {{ form.postal_code }}
+            {% if form.postal_code.errors %}
+              <p class="text-xs text-red-600 mt-1">{{ form.postal_code.errors.0 }}</p>
+            {% endif %}
+          </div>
+
+          <!-- Optional Notes -->
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-gray-600 mb-1.5">Delivery Instructions (Optional)</label>
+            {{ form.notes }}
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Payment Method Section -->
+      <div class="bg-white border border-outline-variant rounded-2xl p-6 shadow-xs space-y-4">
+        <div class="flex items-center justify-between pb-3 border-b border-gray-100">
+          <h2 class="text-lg font-bold text-gray-900 flex items-center gap-2">
+            <span class="w-7 h-7 rounded-lg bg-primary text-white flex items-center justify-center text-xs font-bold">2</span>
+            <span>Payment Method</span>
+          </h2>
+          <span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">Verified Safe</span>
+        </div>
+
+        <div class="border-2 border-primary bg-blue-50/40 rounded-2xl p-5 flex items-start gap-4 shadow-xs">
+          <div class="pt-0.5">
+            <input type="radio" id="payment_cod" name="payment_method" value="COD" checked class="w-5 h-5 text-primary border-gray-300 focus:ring-primary"/>
+          </div>
+          <div class="space-y-1.5">
+            <label for="payment_cod" class="font-bold text-base text-gray-900 flex items-center gap-2 cursor-pointer">
+              <span>Cash on Delivery (COD)</span>
+              <span class="bg-emerald-600 text-white text-[11px] font-bold px-2 py-0.5 rounded-full">Recommended</span>
+            </label>
+            <p class="text-xs text-gray-600 leading-relaxed">
+              Pay upon parcel delivery at your doorstep in cash or by scanning the delivery agent's official UPI QR code. No online transaction required in advance.
+            </p>
+            <div class="flex items-center gap-3 pt-2 text-[11px] text-gray-500 font-semibold">
+              <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[15px] text-emerald-600">verified</span> Zero risk</span>
+              <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[15px] text-emerald-600">inventory</span> Package inspection allowed</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT COLUMN: Order Recap & Place Order (Span 4) -->
+    <div class="lg:col-span-4 space-y-4">
+      
+      <div class="bg-white border border-outline-variant rounded-2xl p-6 shadow-xs space-y-5">
+        <h3 class="text-base font-bold text-gray-900 pb-3 border-b border-gray-100 flex items-center justify-between">
+          <span>Order Recap</span>
+          <span class="text-xs text-gray-500 font-medium">{{ cart_count }} items</span>
+        </h3>
+
+        <!-- Items Preview -->
+        <div class="space-y-3 max-h-60 overflow-y-auto pr-1 divide-y divide-gray-100">
+          {% for item in cart %}
+            <div class="pt-3 first:pt-0 flex items-center justify-between gap-3 text-xs">
+              <div class="flex items-center gap-2.5 min-w-0">
+                <img src="{{ item.product.get_image_url }}" alt="{{ item.product.name }}" class="w-12 h-12 rounded-lg object-cover bg-gray-50 shrink-0 border border-outline-variant"/>
+                <div class="min-w-0">
+                  <p class="font-semibold text-gray-900 truncate">{{ item.product.name }}</p>
+                  <p class="text-gray-500">Qty: {{ item.quantity }} × ₹{{ item.price|floatformat:2 }}</p>
+                </div>
+              </div>
+              <span class="font-bold text-gray-900 shrink-0">₹{{ item.line_total|floatformat:2 }}</span>
+            </div>
+          {% endfor %}
+        </div>
+
+        <!-- Calculations -->
+        <div class="border-t border-gray-100 pt-3 space-y-2 text-xs text-gray-600">
+          <div class="flex justify-between">
+            <span>Subtotal:</span>
+            <span class="font-semibold text-gray-900">₹{{ subtotal|floatformat:2 }}</span>
+          </div>
+          <div class="flex justify-between">
+            <span>Shipping:</span>
+            <span class="font-bold text-emerald-600">FREE</span>
+          </div>
+          <div class="flex justify-between">
+            <span>COD Handling Fee:</span>
+            <span class="font-bold text-emerald-600">₹0.00</span>
+          </div>
+          <div class="border-t border-gray-100 pt-3 flex items-baseline justify-between">
+            <span class="text-sm font-bold text-gray-900">Total Payable:</span>
+            <div class="text-right">
+              <span class="text-2xl font-extrabold text-primary">₹{{ total|floatformat:2 }}</span>
+              <span class="block text-[11px] text-gray-400">Pay cash upon delivery</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Place Order Submit Button -->
+        <button type="submit" class="w-full bg-primary hover:bg-primary-hover text-white py-3.5 px-6 rounded-xl font-bold text-sm shadow-md shadow-primary/25 flex items-center justify-center gap-2 transition-all transform active:scale-95">
+          <span class="material-symbols-outlined text-[20px]">check_circle</span>
+          <span>Place Order (Cash on Delivery)</span>
+        </button>
+
+        <p class="text-[11px] text-center text-gray-400 leading-normal">
+          By clicking Place Order, your items will be atomically reserved in inventory and dispatched via express logistics.
+        </p>
+
+      </div>
+
+    </div>
+
+  </form>
+
+</div>
+{% endblock %}

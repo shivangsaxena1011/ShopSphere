@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+
+{% block title %}Profile Settings - ShopSphere{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+
+  <!-- Breadcrumbs -->
+  <nav class="flex items-center gap-2 text-xs text-gray-500 font-medium">
+    <a href="{% url 'home' %}" class="hover:text-primary transition-colors flex items-center gap-1">
+      <span class="material-symbols-outlined text-[15px]">home</span> Home
+    </a>
+    <span class="text-gray-300">/</span>
+    <span class="text-gray-900 font-semibold">Account Profile</span>
+  </nav>
+
+  <div class="bg-white border border-outline-variant rounded-3xl p-6 sm:p-10 shadow-xs space-y-8">
+    
+    <!-- User Info Header -->
+    <div class="flex items-center gap-5 pb-6 border-b border-gray-100">
+      <div class="w-16 h-16 rounded-2xl bg-primary text-white flex items-center justify-center font-extrabold text-2xl shadow-sm">
+        {{ user.first_name|default:user.username|slice:":1"|upper }}
+      </div>
+      <div>
+        <h1 class="text-2xl font-extrabold text-gray-900">{{ user.get_full_name|default:user.username }}</h1>
+        <p class="text-xs text-gray-500">{{ user.email }} • Member since {{ user.date_joined|date:"M Y" }}</p>
+        <div class="flex items-center gap-4 mt-2 text-xs font-semibold">
+          <a href="{% url 'order_history' %}" class="text-primary hover:underline flex items-center gap-1">
+            <span class="material-symbols-outlined text-[16px]">receipt_long</span>
+            <span>{{ orders_count }} Orders Placed</span>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Edit Profile Form -->
+    <form method="POST" class="space-y-6">
+      {% csrf_token %}
+
+      <h3 class="text-sm font-bold uppercase tracking-wider text-gray-500">Contact & Default Delivery Information</h3>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-gray-600 mb-1.5">First Name</label>
+          <input type="text" name="first_name" value="{{ form.first_name.value|default:'' }}" class="w-full bg-gray-50 border border-outline-variant rounded-xl px-4 py-3 text-sm text-gray-900 outline-none focus:border-primary"/>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-gray-600 mb-1.5">Last Name</label>
+          <input type="text" name="last_name" value="{{ form.last_name.value|default:'' }}" class="w-full bg-gray-50 border border-outline-variant rounded-xl px-4 py-3 text-sm text-gray-900 outline-none focus:border-primary"/>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-gray-600 mb-1.5">Email Address</label>
+          <input type="email" name="email" value="{{ form.email.value|default:'' }}" required class="w-full bg-gray-50 border border-outline-variant rounded-xl px-4 py-3 text-sm text-gray-900 outline-none focus:border-primary"/>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-gray-600 mb-1.5">Phone Number</label>
+          <input type="text" name="phone" value="{{ form.phone.value|default:'' }}" placeholder="+91 9876543210" class="w-full bg-gray-50 border border-outline-variant rounded-xl px-4 py-3 text-sm text-gray-900 outline-none focus:border-primary"/>
+        </div>
+
+        <div class="sm:col-span-2">
+          <label class="block text-xs font-bold uppercase tracking-wider text-gray-600 mb-1.5">Default Delivery Street Address</label>
+          <textarea name="address" rows="3" placeholder="Enter house/flat number, road, landmark" class="w-full bg-gray-50 border border-outline-variant rounded-xl px-4 py-3 text-sm text-gray-900 outline-none focus:border-primary">{{ form.address.value|default:'' }}</textarea>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-gray-600 mb-1.5">City</label>
+          <input type="text" name="city" value="{{ form.city.value|default:'' }}" placeholder="e.g. Bhopal" class="w-full bg-gray-50 border border-outline-variant rounded-xl px-4 py-3 text-sm text-gray-900 outline-none focus:border-primary"/>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-gray-600 mb-1.5">State</label>
+          <input type="text" name="state" value="{{ form.state.value|default:'' }}" placeholder="e.g. Madhya Pradesh" class="w-full bg-gray-50 border border-outline-variant rounded-xl px-4 py-3 text-sm text-gray-900 outline-none focus:border-primary"/>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-gray-600 mb-1.5">Postal / PIN Code</label>
+          <input type="text" name="postal_code" value="{{ form.postal_code.value|default:'' }}" placeholder="e.g. 462001" class="w-full bg-gray-50 border border-outline-variant rounded-xl px-4 py-3 text-sm text-gray-900 outline-none focus:border-primary"/>
+        </div>
+      </div>
+
+      <div class="pt-4 border-t border-gray-100 flex items-center justify-end gap-3">
+        <a href="{% url 'home' %}" class="px-6 py-2.5 rounded-xl border border-outline-variant text-xs font-bold text-gray-700 hover:bg-gray-50">Cancel</a>
+        <button type="submit" class="bg-primary hover:bg-primary-hover text-white text-xs font-bold px-7 py-2.5 rounded-xl shadow-sm transition-colors">
+          Save Profile Details
+        </button>
+      </div>
+    </form>
+
+  </div>
+
+</div>
+{% endblock %}

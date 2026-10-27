@@ -1,0 +1,1 @@
+"""ShopSphere configuration package."""
