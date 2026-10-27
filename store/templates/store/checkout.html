@@ -178,6 +178,12 @@
             <span>Subtotal:</span>
             <span class="font-semibold text-gray-900">₹{{ subtotal|floatformat:2 }}</span>
           </div>
+          {% if discount %}
+            <div class="flex justify-between text-emerald-600 font-medium">
+              <span>Coupon Discount ({{ coupon_code }}):</span>
+              <span class="font-bold">-₹{{ discount|floatformat:2 }}</span>
+            </div>
+          {% endif %}
           <div class="flex justify-between">
             <span>Shipping:</span>
             <span class="font-bold text-emerald-600">FREE</span>

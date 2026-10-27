@@ -44,7 +44,7 @@
           <div class="flex items-center justify-between pb-4 border-b border-gray-100 mb-4">
             <h1 class="text-xl font-bold text-gray-900 flex items-center gap-2">
               <span class="material-symbols-outlined text-primary text-[24px]">shopping_bag</span>
-              <span>Your Shopping Cart ({{ cart_count }} {% if cart_count == 1 %}item{% else %}items{% endif %})</span>
+              <span>Your Shopping Cart (<span id="cart-item-count-label">{{ cart_count }}</span> {% if cart_count == 1 %}item{% else %}items{% endif %})</span>
             </h1>
             <span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full flex items-center gap-1">
               <span class="material-symbols-outlined text-[14px]">check_circle</span> Live Stock Allocated
@@ -52,7 +52,7 @@
           </div>
 
           <!-- Items List -->
-          <div class="divide-y divide-gray-100">
+          <div class="divide-y divide-gray-100" id="cart-items-container">
             {% for item in cart %}
               <div class="py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 cart-row-{{ item.product.id }}">
                 
@@ -68,7 +68,7 @@
                     </h3>
                     <p class="text-xs text-gray-500">Unit Price: ₹{{ item.price|floatformat:2 }}</p>
                     <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-600">
-                      <span class="material-symbols-outlined text-[13px]">check</span> In Stock
+                      <span class="material-symbols-outlined text-[13px]">check</span> In Stock ({{ item.product.stock }} max)
                     </span>
                   </div>
                 </div>
@@ -82,11 +82,11 @@
                   <div class="flex items-center gap-3">
                     <!-- Stepper -->
                     <div class="inline-flex items-center bg-gray-50 border border-outline-variant rounded-xl p-0.5 shadow-xs">
-                      <button type="button" onclick="updateCartItem({{ item.product.id }}, {{ item.quantity|add:'-1' }})" class="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-gray-200 text-gray-700 transition-colors">
+                      <button type="button" onclick="updateCartItem({{ item.product.id }}, {{ item.quantity|add:'-1' }})" class="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-gray-200 text-gray-700 transition-colors" title="Decrease quantity">
                         <span class="material-symbols-outlined text-[15px]">remove</span>
                       </button>
-                      <span class="w-8 text-center text-xs font-bold text-gray-800">{{ item.quantity }}</span>
-                      <button type="button" onclick="updateCartItem({{ item.product.id }}, {{ item.quantity|add:'1' }})" class="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-gray-200 text-gray-700 transition-colors">
+                      <span class="w-8 text-center text-xs font-bold text-gray-800" id="item-qty-{{ item.product.id }}">{{ item.quantity }}</span>
+                      <button type="button" onclick="updateCartItem({{ item.product.id }}, {{ item.quantity|add:'1' }})" class="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-gray-200 text-gray-700 transition-colors {% if item.quantity >= item.product.stock %}opacity-50 cursor-not-allowed{% endif %}" title="Increase quantity">
                         <span class="material-symbols-outlined text-[15px]">add</span>
                       </button>
                     </div>
@@ -147,6 +147,18 @@
               <span>Items Subtotal:</span>
               <span class="font-semibold text-gray-900" id="cart-summary-subtotal">₹{{ subtotal|floatformat:2 }}</span>
             </div>
+            
+            <!-- Discount Row -->
+            <div class="flex items-center justify-between text-emerald-600 {% if not discount %}hidden{% endif %}" id="cart-discount-row">
+              <span class="flex items-center gap-1">
+                <span>Promo Discount:</span>
+                {% if coupon_code %}
+                  <span class="text-[11px] font-bold bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded uppercase" id="applied-coupon-label">{{ coupon_code }}</span>
+                {% endif %}
+              </span>
+              <span class="font-bold" id="cart-summary-discount">-₹{{ discount|floatformat:2 }}</span>
+            </div>
+
             <div class="flex items-center justify-between text-gray-600">
               <span>Shipping & Delivery:</span>
               <span class="font-bold text-emerald-600">FREE</span>
@@ -157,15 +169,31 @@
             </div>
 
             <!-- Coupon Code Form -->
-            <div class="pt-2">
+            <div class="pt-2 border-t border-gray-100">
               <label class="block text-xs font-semibold text-gray-500 mb-1.5">Have a Promo Coupon?</label>
-              <div class="flex items-center gap-2">
-                <input type="text" id="couponInput" placeholder="e.g. SHOPSPHERE10" class="flex-1 bg-gray-50 border border-outline-variant rounded-xl px-3 py-2 text-xs text-gray-800 outline-none uppercase font-semibold focus:border-primary"/>
-                <button type="button" onclick="applyCoupon()" class="bg-gray-100 hover:bg-primary hover:text-white text-gray-700 text-xs font-bold px-3 py-2 rounded-xl transition-colors">
-                  Apply
-                </button>
-              </div>
-              <p id="couponFeedback" class="text-[11px] text-emerald-600 font-semibold mt-1 hidden"></p>
+              {% if coupon_code %}
+                <div class="flex items-center justify-between p-2.5 bg-emerald-50 border border-emerald-200 rounded-xl">
+                  <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-emerald-600 text-[18px]">loyalty</span>
+                    <span class="text-xs font-bold text-emerald-800 uppercase">{{ coupon_code }} Applied</span>
+                  </div>
+                  <form action="{% url 'cart_remove_coupon' %}" method="POST">
+                    {% csrf_token %}
+                    <button type="submit" class="text-xs font-bold text-red-600 hover:text-red-800 hover:underline">
+                      Remove
+                    </button>
+                  </form>
+                </div>
+              {% else %}
+                <form action="{% url 'cart_apply_coupon' %}" method="POST" id="couponForm" class="flex items-center gap-2">
+                  {% csrf_token %}
+                  <input type="text" name="coupon_code" id="couponInput" placeholder="Try SHOPSPHERE10" class="flex-1 bg-gray-50 border border-outline-variant rounded-xl px-3 py-2 text-xs text-gray-800 outline-none uppercase font-semibold focus:border-primary"/>
+                  <button type="submit" class="bg-gray-100 hover:bg-primary hover:text-white text-gray-700 text-xs font-bold px-3 py-2 rounded-xl transition-colors">
+                    Apply
+                  </button>
+                </form>
+                <p class="text-[10px] text-gray-400 mt-1">Try coupon <strong>SHOPSPHERE10</strong> or <strong>FIRSTBUY</strong></p>
+              {% endif %}
             </div>
 
             <div class="border-t border-gray-100 pt-3 flex items-baseline justify-between">
@@ -228,22 +256,6 @@ function updateCartItem(productId, quantity) {
   document.getElementById('updateProductId').value = productId;
   document.getElementById('updateQuantity').value = quantity;
   form.submit();
-}
-
-function applyCoupon() {
-  const code = document.getElementById('couponInput').value.trim().toUpperCase();
-  const feedback = document.getElementById('couponFeedback');
-  if (code === 'SHOPSPHERE10' || code === 'FIRSTBUY') {
-    feedback.innerText = "Coupon applied! Enjoy 10% complimentary doorstep benefit.";
-    feedback.classList.remove('hidden');
-    feedback.classList.remove('text-red-600');
-    feedback.classList.add('text-emerald-600');
-  } else if (code) {
-    feedback.innerText = "Invalid coupon code. Try 'FIRSTBUY' or 'SHOPSPHERE10'.";
-    feedback.classList.remove('hidden');
-    feedback.classList.remove('text-emerald-600');
-    feedback.classList.add('text-red-600');
-  }
 }
 </script>
 {% endblock %}

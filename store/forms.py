@@ -3,7 +3,8 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from store.models import UserProfile
 
-class UserRegisterForm(forms.ModelForm):
+
+class UserRegisterForm(forms.Form):
     full_name = forms.CharField(
         max_length=100,
         required=True,
@@ -34,10 +35,6 @@ class UserRegisterForm(forms.ModelForm):
         })
     )
 
-    class Meta:
-        model = User
-        fields = ['full_name', 'email', 'password']
-
     def clean_email(self):
         email = self.cleaned_data.get('email', '').strip().lower()
         if User.objects.filter(email__iexact=email).exists():
@@ -51,7 +48,7 @@ class UserRegisterForm(forms.ModelForm):
 
         if password and confirm_password and password != confirm_password:
             self.add_error('confirm_password', "Passwords do not match.")
-        
+
         if password and len(password) < 6:
             self.add_error('password', "Password must be at least 6 characters long.")
 
@@ -142,3 +139,21 @@ class UserProfileForm(forms.ModelForm):
     class Meta:
         model = UserProfile
         fields = ['phone', 'address', 'city', 'state', 'postal_code']
+
+    def __init__(self, *args, user=None, **kwargs):
+        self.user = user
+        super().__init__(*args, **kwargs)
+        if not self.user and hasattr(self.instance, 'user'):
+            self.user = self.instance.user
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email', '').strip().lower()
+        # Ensure email is unique across other users
+        user_id = self.user.id if self.user else getattr(self.instance, 'user_id', None)
+        if user_id:
+            if User.objects.filter(email__iexact=email).exclude(pk=user_id).exists():
+                raise ValidationError("This email address is already in use by another account.")
+        else:
+            if User.objects.filter(email__iexact=email).exists():
+                raise ValidationError("This email address is already in use by another account.")
+        return email

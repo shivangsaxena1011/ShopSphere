@@ -201,3 +201,118 @@ class ShopSphereSearchAndCatalogTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Mechanical Keyboard")
         self.assertNotContains(response, "Django for Beginners")
+
+
+class ShopSphereBugFixAndEnhancementTests(TestCase):
+    def setUp(self):
+        self.cat = Category.objects.create(name="Accessories", slug="accessories")
+        self.product = Product.objects.create(
+            category=self.cat,
+            name="Ultra Fast Charger",
+            slug="ultra-fast-charger",
+            description="65W GaN Charger.",
+            price=Decimal("1500.00"),
+            stock=10,
+            is_active=True
+        )
+        self.user1 = User.objects.create_user(
+            username="user1", email="user1@example.com", password="Password123!"
+        )
+        self.user2 = User.objects.create_user(
+            username="user2", email="user2@example.com", password="Password123!"
+        )
+        self.client = Client()
+
+    def test_slug_collision_resolution(self):
+        # Create second product with identical name -> slug should append -1, -2, etc.
+        p2 = Product.objects.create(
+            category=self.cat,
+            name="Ultra Fast Charger",
+            description="Duplicate name charger",
+            price=Decimal("1500.00"),
+            stock=5,
+            is_active=True
+        )
+        self.assertEqual(p2.slug, "ultra-fast-charger-1")
+
+        # Create category with conflicting slug
+        c2 = Category.objects.create(name="Accessories Extra", slug="accessories")
+        self.assertEqual(c2.slug, "accessories-1")
+
+    def test_coupon_discount_calculation_and_removal(self):
+        self.client.login(username="user1", password="Password123!")
+        # Add item to cart
+        self.client.post(reverse('cart_add', kwargs={'product_id': self.product.id}), {'quantity': 1})
+
+        # Apply SHOPSPHERE10 (10% discount)
+        response = self.client.post(reverse('cart_apply_coupon'), {'coupon_code': 'SHOPSPHERE10'}, follow=True)
+        self.assertEqual(response.status_code, 200)
+        cart = Cart(self.client)
+        self.assertEqual(cart.coupon_code, "SHOPSPHERE10")
+        self.assertEqual(cart.get_discount_amount(), Decimal("150.00"))
+        self.assertEqual(cart.get_total_price(), Decimal("1350.00"))
+
+        # Remove coupon
+        response = self.client.post(reverse('cart_remove_coupon'), follow=True)
+        self.assertEqual(response.status_code, 200)
+        cart = Cart(self.client)
+        self.assertIsNone(cart.coupon_code)
+        self.assertEqual(cart.get_discount_amount(), Decimal("0.00"))
+        self.assertEqual(cart.get_total_price(), Decimal("1500.00"))
+
+    def test_checkout_with_coupon_applies_to_order(self):
+        self.client.login(username="user1", password="Password123!")
+        self.client.post(reverse('cart_add', kwargs={'product_id': self.product.id}), {'quantity': 2}) # 3000.00
+        self.client.post(reverse('cart_apply_coupon'), {'coupon_code': 'FIRSTBUY'}) # Flat 200 off
+
+        checkout_data = {
+            'full_name': 'Test User 1',
+            'phone': '9876543210',
+            'address': 'MG Road',
+            'city': 'Indore',
+            'state': 'MP',
+            'postal_code': '452001'
+        }
+        response = self.client.post(reverse('checkout'), checkout_data)
+        self.assertEqual(response.status_code, 302)
+
+        order = Order.objects.filter(user=self.user1).latest('id')
+        self.assertEqual(order.coupon_code, 'FIRSTBUY')
+        self.assertEqual(order.discount_amount, Decimal('200.00'))
+        self.assertEqual(order.subtotal, Decimal('3000.00'))
+        self.assertEqual(order.total, Decimal('2800.00'))
+
+    def test_profile_form_email_collision_prevented(self):
+        from store.forms import UserProfileForm
+        # Attempt to set user1's email to user2's email
+        form = UserProfileForm(data={
+            'first_name': 'User',
+            'last_name': 'One',
+            'email': 'user2@example.com', # Already taken by user2
+            'phone': '1234567890',
+            'address': 'Street',
+            'city': 'Indore',
+            'state': 'MP',
+            'postal_code': '452001'
+        }, instance=self.user1.profile, user=self.user1)
+
+        self.assertFalse(form.is_valid())
+        self.assertIn('email', form.errors)
+        self.assertIn("already in use", form.errors['email'][0])
+
+    def test_login_redirect_preserves_next_param(self):
+        # Put item in cart so /checkout/ doesn't redirect to /cart/
+        self.client.post(reverse('cart_add', kwargs={'product_id': self.product.id}), {'quantity': 1})
+
+        # Try accessing checkout while unauthenticated
+        response = self.client.get(reverse('checkout'))
+        self.assertEqual(response.status_code, 302)
+        self.assertIn('next=/checkout/', response.url)
+
+        # Login with next param
+        login_response = self.client.post(
+            reverse('login') + '?next=/checkout/',
+            {'username': 'user1', 'password': 'Password123!'}
+        )
+        self.assertRedirects(login_response, '/checkout/')
+

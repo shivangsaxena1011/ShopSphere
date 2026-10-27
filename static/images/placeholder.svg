@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#EFF6FF" />
+      <stop offset="100%" stop-color="#DBEAFE" />
+    </linearGradient>
+  </defs>
+  <rect width="100%" height="100%" fill="url(#bgGrad)" />
+  <g transform="translate(140, 130)" fill="none" stroke="#3B82F6" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M20 20 L100 20 L90 80 L30 80 Z" fill="#BFDBFE" fill-opacity="0.5"/>
+    <circle cx="40" cy="95" r="8" fill="#2563EB"/>
+    <circle cx="80" cy="95" r="8" fill="#2563EB"/>
+    <path d="M45 45 C45 35, 75 35, 75 45" />
+    <path d="M10 20 L20 20" />
+  </g>
+  <text x="200" y="270" font-family="Inter, system-ui, sans-serif" font-size="16" font-weight="600" fill="#1E40AF" text-anchor="middle">ShopSphere</text>
+  <text x="200" y="292" font-family="Inter, system-ui, sans-serif" font-size="12" fill="#6B7280" text-anchor="middle">Product Image Coming Soon</text>
+</svg>

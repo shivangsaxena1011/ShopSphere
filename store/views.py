@@ -114,6 +114,8 @@ def cart_view(request):
     context = {
         'cart': cart,
         'subtotal': cart.get_subtotal(),
+        'discount': cart.get_discount(),
+        'coupon_code': cart.get_coupon_code(),
         'shipping': cart.get_shipping_cost(),
         'total': cart.get_total(),
     }
@@ -147,7 +149,7 @@ def cart_add_view(request, product_id):
         return JsonResponse({
             'status': 'success',
             'cart_count': len(cart),
-            'cart_total': str(cart.get_total()),
+            'cart_total': f"₹{cart.get_total():,.2f}",
             'message': f"Added {product.name} to your cart!"
         })
 
@@ -181,6 +183,7 @@ def cart_update_view(request):
             'cart_count': len(cart),
             'line_total': f"₹{item_line_total:,.2f}",
             'subtotal': f"₹{cart.get_subtotal():,.2f}",
+            'discount': f"₹{cart.get_discount():,.2f}",
             'total': f"₹{cart.get_total():,.2f}",
         })
 
@@ -199,6 +202,47 @@ def cart_remove_view(request, product_id):
             'status': 'success',
             'cart_count': len(cart),
             'subtotal': f"₹{cart.get_subtotal():,.2f}",
+            'discount': f"₹{cart.get_discount():,.2f}",
+            'total': f"₹{cart.get_total():,.2f}",
+        })
+
+    return redirect('cart')
+
+
+@require_POST
+def cart_apply_coupon_view(request):
+    cart = Cart(request)
+    code = request.POST.get('coupon_code', '')
+    success, message = cart.apply_coupon(code)
+
+    if success:
+        messages.success(request, message)
+    else:
+        messages.error(request, message)
+
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        return JsonResponse({
+            'status': 'success' if success else 'error',
+            'message': message,
+            'coupon_code': cart.get_coupon_code(),
+            'discount': f"₹{cart.get_discount():,.2f}",
+            'total': f"₹{cart.get_total():,.2f}",
+        })
+
+    return redirect('cart')
+
+
+@require_POST
+def cart_remove_coupon_view(request):
+    cart = Cart(request)
+    cart.remove_coupon()
+    messages.info(request, "Promotional coupon removed.")
+
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        return JsonResponse({
+            'status': 'success',
+            'message': 'Coupon removed.',
+            'discount': f"₹{cart.get_discount():,.2f}",
             'total': f"₹{cart.get_total():,.2f}",
         })
 
@@ -242,6 +286,8 @@ def checkout_view(request):
         'form': form,
         'cart': cart,
         'subtotal': cart.get_subtotal(),
+        'discount': cart.get_discount(),
+        'coupon_code': cart.get_coupon_code(),
         'shipping': cart.get_shipping_cost(),
         'total': cart.get_total(),
     }
@@ -293,6 +339,8 @@ def user_register_view(request):
     if request.user.is_authenticated:
         return redirect('home')
 
+    next_url = request.GET.get('next') or request.POST.get('next')
+
     if request.method == 'POST':
         form = UserRegisterForm(request.POST)
         if form.is_valid():
@@ -301,7 +349,6 @@ def user_register_view(request):
             full_name = form.cleaned_data['full_name']
 
             username = email.split('@')[0]
-            # Ensure unique username
             base_username = username
             counter = 1
             while User.objects.filter(username=username).exists():
@@ -325,16 +372,20 @@ def user_register_view(request):
             cart.merge_from_db_to_session(user)
 
             messages.success(request, f"Welcome to ShopSphere, {full_name or username}! Your account has been created.")
+            if next_url:
+                return redirect(next_url)
             return redirect('home')
     else:
         form = UserRegisterForm()
 
-    return render(request, 'registration/register.html', {'form': form})
+    return render(request, 'registration/register.html', {'form': form, 'next': next_url})
 
 
 def user_login_view(request):
     if request.user.is_authenticated:
         return redirect('home')
+
+    next_url = request.GET.get('next') or request.POST.get('next')
 
     if request.method == 'POST':
         form = UserLoginForm(request.POST)
@@ -362,7 +413,6 @@ def user_login_view(request):
                 cart.merge_from_db_to_session(user)
 
                 messages.success(request, f"Welcome back, {user.first_name or user.username}!")
-                next_url = request.GET.get('next')
                 if next_url:
                     return redirect(next_url)
                 return redirect('home')
@@ -371,7 +421,7 @@ def user_login_view(request):
     else:
         form = UserLoginForm()
 
-    return render(request, 'registration/login.html', {'form': form})
+    return render(request, 'registration/login.html', {'form': form, 'next': next_url})
 
 
 @login_required

@@ -16,8 +16,11 @@
     </div>
 
     <!-- Registration Form -->
-    <form method="POST" action="{% url 'register' %}" class="space-y-4">
+    <form method="POST" action="{% url 'register' %}{% if next %}?next={{ next }}{% endif %}" class="space-y-4">
       {% csrf_token %}
+      {% if next %}
+        <input type="hidden" name="next" value="{{ next }}"/>
+      {% endif %}
 
       <div>
         <label class="block text-xs font-bold uppercase tracking-wider text-gray-600 mb-1.5">Full Name</label>
@@ -61,7 +64,7 @@
     <!-- Sign in alternative -->
     <p class="text-xs text-center text-gray-500 pt-2 border-t border-gray-100">
       Already have an account? 
-      <a href="{% url 'login' %}" class="font-bold text-primary hover:underline">Sign In</a>
+      <a href="{% url 'login' %}{% if next %}?next={{ next }}{% endif %}" class="font-bold text-primary hover:underline">Sign In</a>
     </p>
 
   </div>

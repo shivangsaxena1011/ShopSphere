@@ -34,7 +34,15 @@ class Category(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug = slugify(self.name)
+            base_slug = slugify(self.name)
+        else:
+            base_slug = slugify(self.slug)
+        slug = base_slug
+        counter = 1
+        while Category.objects.filter(slug=slug).exclude(pk=self.pk).exists():
+            slug = f"{base_slug}-{counter}"
+            counter += 1
+        self.slug = slug
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -64,9 +72,18 @@ class Product(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug = slugify(self.name)
-        if not self.original_price:
-            self.original_price = (self.price * Decimal('1.25')).quantize(Decimal('0.01'))
+            base_slug = slugify(self.name)
+        else:
+            base_slug = slugify(self.slug)
+        slug = base_slug
+        counter = 1
+        while Product.objects.filter(slug=slug).exclude(pk=self.pk).exists():
+            slug = f"{base_slug}-{counter}"
+            counter += 1
+        self.slug = slug
+        if self.price:
+            if not self.original_price or self.original_price < self.price:
+                self.original_price = (self.price * Decimal('1.25')).quantize(Decimal('0.01'))
         super().save(*args, **kwargs)
 
     @property
@@ -76,7 +93,10 @@ class Product(models.Model):
     @property
     def get_image_url(self):
         if self.image:
-            return self.image.url
+            try:
+                return self.image.url
+            except Exception:
+                pass
         if self.image_url:
             return self.image_url
         return '/static/images/placeholder.svg'
@@ -155,6 +175,8 @@ class Order(models.Model):
     state = models.CharField(max_length=60)
     postal_code = models.CharField(max_length=20)
     subtotal = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
+    discount_amount = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
+    coupon_code = models.CharField(max_length=30, blank=True, default='')
     shipping_cost = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
     total = models.DecimalField(max_digits=10, decimal_places=2)
     payment_method = models.CharField(max_length=40, default='Cash on Delivery (COD)')

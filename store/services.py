@@ -7,7 +7,7 @@ from store.models import Order, OrderItem, Product
 def create_order_from_cart(user, cart, checkout_data):
     """
     Atomically creates an Order from the Cart, decrements stock, and stores item snapshots.
-    Guarantees rollback if stock is insufficient or concurrent updates occur.
+    Guarantees rollback if stock is insufficient, products are deleted, or concurrent updates occur.
     """
     if len(cart) == 0:
         raise ValidationError("Cannot checkout with an empty shopping cart.")
@@ -18,7 +18,15 @@ def create_order_from_cart(user, cart, checkout_data):
 
         # 1. Lock and validate stock for all products in cart
         for item in cart:
-            product = Product.objects.select_for_update().get(id=item['product'].id)
+            product_ref = item.get('product')
+            if not product_ref:
+                raise ValidationError("One or more items in your cart are no longer valid.")
+
+            try:
+                product = Product.objects.select_for_update().get(id=product_ref.id)
+            except Product.DoesNotExist:
+                raise ValidationError(f"Product '{product_ref.name}' is no longer available in the store.")
+
             requested_qty = item['quantity']
 
             if not product.is_active:
@@ -41,7 +49,9 @@ def create_order_from_cart(user, cart, checkout_data):
         # 2. Generate unique order number and calculate totals
         order_number = f"SS{uuid.uuid4().hex[:8].upper()}"
         shipping = cart.get_shipping_cost()
-        total = subtotal + shipping
+        discount = cart.get_discount()
+        coupon_code = cart.get_coupon_code()
+        total = max(subtotal - discount + shipping, Decimal('0.00'))
 
         # 3. Create the order
         order = Order.objects.create(
@@ -54,6 +64,8 @@ def create_order_from_cart(user, cart, checkout_data):
             state=checkout_data.get('state', '').strip(),
             postal_code=checkout_data.get('postal_code', '').strip(),
             subtotal=subtotal,
+            discount_amount=discount,
+            coupon_code=coupon_code,
             shipping_cost=shipping,
             total=total,
             payment_method='Cash on Delivery (COD)',
